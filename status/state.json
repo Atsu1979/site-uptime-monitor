@@ -1,1 +1,78 @@
-{"incidents": [], "last_heartbeat": "", "targets": {}}
+{
+  "incidents": [],
+  "last_heartbeat": "2026-W39",
+  "targets": {
+    "cert:ask-tabi.automationjp.com": {
+      "issue": null,
+      "name": "証明書 ask-tabi.automationjp.com",
+      "reason": "証明書の残り 51日",
+      "since": "2026-09-24T02:00:19Z",
+      "state": "up",
+      "url": "https://ask-tabi.automationjp.com/"
+    },
+    "cert:ask.automationjp.com": {
+      "issue": null,
+      "name": "証明書 ask.automationjp.com",
+      "reason": "証明書の残り 51日",
+      "since": "2026-09-24T02:00:19Z",
+      "state": "up",
+      "url": "https://ask.automationjp.com/"
+    },
+    "cert:shuzen-navi.com": {
+      "issue": null,
+      "name": "証明書 shuzen-navi.com",
+      "reason": "証明書の残り 74日",
+      "since": "2026-09-24T02:00:19Z",
+      "state": "up",
+      "url": "https://shuzen-navi.com/"
+    },
+    "cert:tabi-hikaku.com": {
+      "issue": null,
+      "name": "証明書 tabi-hikaku.com",
+      "reason": "証明書の残り 74日",
+      "since": "2026-09-24T02:00:19Z",
+      "state": "up",
+      "url": "https://tabi-hikaku.com/"
+    },
+    "shuzen-ask": {
+      "issue": null,
+      "name": "修繕ナビ AIチャット",
+      "reason": "正常",
+      "since": "2026-09-24T02:00:19Z",
+      "state": "up",
+      "url": "https://ask.automationjp.com/health"
+    },
+    "shuzen-top": {
+      "issue": null,
+      "name": "修繕ナビ トップ",
+      "reason": "正常",
+      "since": "2026-09-24T02:00:19Z",
+      "state": "up",
+      "url": "https://shuzen-navi.com/"
+    },
+    "tabi-ask": {
+      "issue": null,
+      "name": "旅比較 AIチャット",
+      "reason": "正常",
+      "since": "2026-09-24T02:00:19Z",
+      "state": "up",
+      "url": "https://ask-tabi.automationjp.com/health"
+    },
+    "tabi-hiroshima": {
+      "issue": null,
+      "name": "旅比較 記事（原爆ドーム・平和記念資料館）",
+      "reason": "正常",
+      "since": "2026-09-24T02:00:19Z",
+      "state": "up",
+      "url": "https://tabi-hikaku.com/hiroshima-hiroshima-peace.html"
+    },
+    "tabi-top": {
+      "issue": null,
+      "name": "旅比較 トップ",
+      "reason": "正常",
+      "since": "2026-09-24T02:00:19Z",
+      "state": "up",
+      "url": "https://tabi-hikaku.com/"
+    }
+  }
+}
