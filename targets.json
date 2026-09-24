@@ -1,0 +1,37 @@
+[
+  {
+    "id": "tabi-top",
+    "name": "旅比較 トップ",
+    "url": "https://tabi-hikaku.com/",
+    "must_contain": "旅比較",
+    "min_bytes": 50000
+  },
+  {
+    "id": "tabi-hiroshima",
+    "name": "旅比較 記事（原爆ドーム・平和記念資料館）",
+    "url": "https://tabi-hikaku.com/hiroshima-hiroshima-peace.html",
+    "must_contain": "原爆ドーム",
+    "min_bytes": 20000
+  },
+  {
+    "id": "shuzen-top",
+    "name": "修繕ナビ トップ",
+    "url": "https://shuzen-navi.com/",
+    "must_contain": "修繕ナビ",
+    "min_bytes": 5000
+  },
+  {
+    "id": "tabi-ask",
+    "name": "旅比較 AIチャット",
+    "url": "https://ask-tabi.automationjp.com/health",
+    "json_true": "ok",
+    "timeout": 20
+  },
+  {
+    "id": "shuzen-ask",
+    "name": "修繕ナビ AIチャット",
+    "url": "https://ask.automationjp.com/health",
+    "json_true": "ok",
+    "timeout": 20
+  }
+]
