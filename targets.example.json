@@ -1,0 +1,7 @@
+[
+  { "id": "t1", "label": "Site A (top)",     "url": "https://example.com/",          "must_contain": "Example", "min_bytes": 1000 },
+  { "id": "t2", "label": "Site A (article)", "url": "https://example.com/page.html",  "must_contain": "Example", "min_bytes": 1000 },
+  { "id": "t3", "label": "Site B (top)",     "url": "https://example.org/",           "must_contain": "Example", "min_bytes": 1000 },
+  { "id": "h1", "label": "AI health 1",      "url": "https://api.example.com/health", "json_true": "ok", "timeout": 20 },
+  { "id": "h2", "label": "AI health 2",      "url": "https://api.example.org/health", "json_true": "ok", "timeout": 20 }
+]
