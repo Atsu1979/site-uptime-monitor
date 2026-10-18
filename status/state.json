@@ -1,5 +1,78 @@
 {
   "incidents": [],
-  "last_heartbeat": "",
-  "targets": {}
+  "last_heartbeat": "2026-W43",
+  "targets": {
+    "cert:c1": {
+      "issue": null,
+      "name": "TLS証明書 1",
+      "reason": "証明書の残り 86日",
+      "since": "2026-10-18T17:35:37Z",
+      "state": "up",
+      "url": ""
+    },
+    "cert:c2": {
+      "issue": null,
+      "name": "TLS証明書 2",
+      "reason": "証明書の残り 86日",
+      "since": "2026-10-18T17:35:37Z",
+      "state": "up",
+      "url": ""
+    },
+    "cert:c3": {
+      "issue": null,
+      "name": "TLS証明書 3",
+      "reason": "証明書の残り 49日",
+      "since": "2026-10-18T17:35:37Z",
+      "state": "up",
+      "url": ""
+    },
+    "cert:c4": {
+      "issue": null,
+      "name": "TLS証明書 4",
+      "reason": "証明書の残り 49日",
+      "since": "2026-10-18T17:35:37Z",
+      "state": "up",
+      "url": ""
+    },
+    "shuzen-ask": {
+      "issue": null,
+      "name": "AI health 2",
+      "reason": "正常",
+      "since": "2026-10-18T17:35:37Z",
+      "state": "up",
+      "url": ""
+    },
+    "shuzen-top": {
+      "issue": null,
+      "name": "Site B (top)",
+      "reason": "正常",
+      "since": "2026-10-18T17:35:37Z",
+      "state": "up",
+      "url": ""
+    },
+    "tabi-ask": {
+      "issue": null,
+      "name": "AI health 1",
+      "reason": "正常",
+      "since": "2026-10-18T17:35:37Z",
+      "state": "up",
+      "url": ""
+    },
+    "tabi-hiroshima": {
+      "issue": null,
+      "name": "Site A (article)",
+      "reason": "正常",
+      "since": "2026-10-18T17:35:37Z",
+      "state": "up",
+      "url": ""
+    },
+    "tabi-top": {
+      "issue": null,
+      "name": "Site A (top)",
+      "reason": "正常",
+      "since": "2026-10-18T17:35:37Z",
+      "state": "up",
+      "url": ""
+    }
+  }
 }
