@@ -67,16 +67,6 @@ def send(text, event=None):
     return ok
 
 
-def configured():
-    """どの通知先が設定されているか（ログ用。値そのものは返さない）。"""
-    names = []
-    if os.environ.get("TELEGRAM_BOT_TOKEN", "").strip() and os.environ.get("TELEGRAM_CHAT_ID", "").strip():
-        names.append("telegram")
-    if os.environ.get("WEBHOOK_URL", "").strip():
-        names.append("webhook")
-    return names
-
-
 def _gh(method, path, payload=None):
     token = os.environ.get("GITHUB_TOKEN", "")
     repo = os.environ.get("GITHUB_REPOSITORY", "")

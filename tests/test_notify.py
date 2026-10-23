@@ -149,7 +149,6 @@ class Send(unittest.TestCase):
     def test_nothing_configured_is_false(self):
         with mock.patch.dict(os.environ, CLEAN):
             self.assertFalse(notify.send("x"))
-            self.assertEqual(notify.configured(), [])
 
     def test_one_channel_failing_does_not_stop_the_other(self):
         with mock.patch.object(notify, "telegram", side_effect=RuntimeError("bug")), \
@@ -161,10 +160,6 @@ class Send(unittest.TestCase):
         with mock.patch.object(notify, "telegram", side_effect=RuntimeError("bug")), \
                 mock.patch.object(notify, "webhook", side_effect=OSError("x")):
             self.assertFalse(notify.send("x"))
-
-    def test_configured_names(self):
-        with mock.patch.dict(os.environ, dict(CLEAN, TELEGRAM_BOT_TOKEN="t", TELEGRAM_CHAT_ID="c", WEBHOOK_URL="http://h/")):
-            self.assertEqual(notify.configured(), ["telegram", "webhook"])
 
     def test_github_issue_without_token_is_noop(self):
         with mock.patch.dict(os.environ, CLEAN), mock.patch.object(notify.urllib.request, "urlopen") as op:
