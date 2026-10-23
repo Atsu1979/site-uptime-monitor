@@ -14,6 +14,7 @@ import json
 import signal
 import socket
 import ssl
+import threading
 import time
 import urllib.error
 import urllib.request
@@ -46,19 +47,21 @@ class Verdict:
 def _deadline(seconds):
     """urlopen の timeout は『1回の受信の待ち時間』で、全体の上限ではない。
     相手が少しずつ返し続けると永遠に終わらないことがあるので、全体にも上限を掛ける。"""
-    if not hasattr(signal, "SIGALRM"):
+    # SIGALRM はメインスレッドでしか使えない（Windows には無い）。使えなければ urlopen の timeout だけに頼る。
+    if not hasattr(signal, "setitimer") or threading.current_thread() is not threading.main_thread():
         yield
         return
 
     def _boom(signum, frame):
-        raise TimeoutError("全体で%d秒を超えた" % seconds)
+        raise TimeoutError("全体で%g秒を超えた" % seconds)
 
     old = signal.signal(signal.SIGALRM, _boom)
-    signal.alarm(int(seconds))
+    # alarm(int(...)) だと1秒未満が0になり『上限なし』になってしまうので、小数が使える setitimer を使う
+    signal.setitimer(signal.ITIMER_REAL, max(float(seconds), 0.01))
     try:
         yield
     finally:
-        signal.alarm(0)
+        signal.setitimer(signal.ITIMER_REAL, 0)
         signal.signal(signal.SIGALRM, old)
 
 
@@ -139,3 +142,34 @@ def cert_days_left(host, port=443, timeout=10):
             with ctx.wrap_socket(sock, server_hostname=host) as tls:
                 not_after = tls.getpeercert()["notAfter"]
     return (ssl.cert_time_to_seconds(not_after) - time.time()) / 86400.0
+
+
+CERT_WARN_DAYS = 14
+# OpenSSL の X509_V_ERR_CERT_HAS_EXPIRED。期限切れだと検証で弾かれて残り日数が取れないので、このコードで見分ける。
+_X509_EXPIRED = 10
+
+
+def cert_verdict(days, warn_days=CERT_WARN_DAYS):
+    """残り日数から状態を決める。warn_days 未満で expiring、0 未満で expired。"""
+    if days < 0:
+        return Verdict("expired", "証明書の期限が切れている（%.0f日前）" % -days)
+    if days < warn_days:
+        return Verdict("expiring", "証明書の残り %.0f日（%d日前から警告）" % (days, warn_days))
+    return Verdict("up", "証明書の残り %.0f日" % days)
+
+
+def cert_check(host, warn_days=CERT_WARN_DAYS, port=443, timeout=10, days_left=cert_days_left):
+    """証明書を見て Verdict を返す。期限切れ以外の理由で見られなかったときは None（判定を変えない）。
+
+    接続できない・名前が合わない等は、同じホストの HTTP の監視が down として拾うので、ここでは二重に鳴らさない。"""
+    try:
+        days = days_left(host, port, timeout)
+    except ssl.SSLCertVerificationError as e:
+        if getattr(e, "verify_code", None) == _X509_EXPIRED:
+            return Verdict("expired", "証明書の期限が切れている")
+        print("cert %-28s 検証できなかった: %s" % (host, getattr(e, "verify_message", "") or type(e).__name__))
+        return None
+    except (OSError, ValueError, KeyError) as e:
+        print("cert %-28s 取れなかった: %s" % (host, type(e).__name__))
+        return None
+    return cert_verdict(days, warn_days)
