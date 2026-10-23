@@ -32,6 +32,7 @@ jobs:
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
         run: python -m monitor.main --test-notify
       - name: Write targets from secret
         if: ${{ !inputs.test_notify }}
@@ -44,6 +45,10 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}         # 未設定なら空になり、Webhook は送らない
+          CERT_WARN_DAYS: ${{ vars.CERT_WARN_DAYS }}      # 未設定（空）なら既定値 14
+          HISTORY_SIZE: ${{ vars.HISTORY_SIZE }}          # 未設定（空）なら既定値 144
+          NOTIFY_TIMEOUT: ${{ vars.NOTIFY_TIMEOUT }}      # 未設定（空）なら既定値 10 秒
         run: python -m monitor.main
       - name: Save status when it changed
         if: ${{ !inputs.test_notify }}
