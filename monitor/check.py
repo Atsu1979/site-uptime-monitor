@@ -16,6 +16,7 @@ import socket
 import ssl
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 from dataclasses import dataclass, field
 
@@ -87,7 +88,13 @@ def fetch(url, timeout, user_agent):
         # プログラムの誤り（AttributeError など）は拾わない。拾うと『サイトが落ちた』と誤報する。
         # 落ちれば GitHub Actions の実行が失敗になり、監視そのものが壊れたことが持ち主に届く。
         reason = getattr(e, "reason", e)
-        return Fetched(0, b"", {}, time.monotonic() - t0, type(reason).__name__ + ": " + str(reason)[:160])
+        # 理由は公開の記録（Actions のログ・status/）に出るので、ホスト名と URL を伏せる
+        msg = str(reason)
+        host = urllib.parse.urlparse(url).hostname or ""
+        for s in (url, host):
+            if s:
+                msg = msg.replace(s, "<host>")
+        return Fetched(0, b"", {}, time.monotonic() - t0, type(reason).__name__ + ": " + msg[:160])
 
 
 def evaluate(target, f):

@@ -30,13 +30,13 @@ def message(ev, url):
     return "🟡 %s\n%s" % (ev["name"], ev["reason"])
 
 
-def weekly_summary(st, targets, now):
+def weekly_summary(st, targets, now, pub=None):
     since = now - dt.timedelta(days=7)
     lines = ["📋 週次の報告（%s）: 監視は動いています" % S.week_key(now)]
     for t in targets:
-        down = S.downtime_minutes(st, t["id"], since, now)
+        down = S.downtime_minutes(st, (pub or S.public_keys(targets))[t["id"]], since, now)
         pct = 100.0 * (1 - down / (7 * 24 * 60.0))
-        lines.append("・%s 稼働率 %.2f%%（停止 %d分）" % (t.get("label", t["id"]), pct, round(down)))
+        lines.append("・%s 稼働率 %.2f%%（停止 %d分）" % (t.get("label") or t["id"], pct, round(down)))
     return "\n".join(lines)
 
 
@@ -64,13 +64,16 @@ def main(argv=None):
 
     state_path = os.path.join(a.status_dir, "state.json")
     st = S.load(state_path)
+    # 公開の記録（state.json 等）には Secret の id を書かず、公開してよいラベルを鍵にする
+    pub = S.public_keys(targets)
+    S.migrate_keys(st, pub)
     now = S.now_utc()
     events = []
 
     for t in targets:
         v = chk.check(t, ua)
-        print("%-4s %-10s %6.2fs 試行%d  %s  %s" % (v.status or "-", v.state, v.elapsed, v.attempts, t["id"], v.reason))
-        ev = S.apply(st, t["id"], t.get("label", t["id"]), "", v.state, v.reason, now)
+        print("%-4s %-10s %6.2fs 試行%d  %s  %s" % (v.status or "-", v.state, v.elapsed, v.attempts, pub[t["id"]], v.reason))
+        ev = S.apply(st, pub[t["id"]], pub[t["id"]], "", v.state, v.reason, now)
         if ev:
             events.append((ev, real[t["id"]][1]))
 
@@ -81,11 +84,11 @@ def main(argv=None):
         try:
             days = chk.cert_days_left(host)
         except Exception as e:
-            print("cert %-28s 取れなかった: %s" % (host, type(e).__name__))
+            print("%s 取れなかった: %s" % (host_label[host][1], type(e).__name__))
             continue
         new = "up" if days >= warn_days else "expiring"
         reason = "証明書の残り %.0f日" % days
-        print("cert %-28s 残り%.0f日" % (host, days))
+        print("%s 残り%.0f日" % (host_label[host][1], days))
         cid, clabel = host_label[host]
         ev = S.apply(st, cid, clabel, "", new, reason, now)
         if ev:
@@ -93,20 +96,23 @@ def main(argv=None):
 
     for ev, url in events:
         text = message(ev, url)
-        print("\n[出来事] " + text.replace("\n", " / "))
+        # Actions のログは公開なので、URL を含む本文は出さない
+        print("\n[出来事] %s: %s → %s" % (ev["name"], ev["old"] or "-", ev["new"]))
         if a.dry_run:
             continue
         notify.telegram(text)
+        # Issues は公開なので URL を外した本文を使う（URL は非公開の Telegram にだけ送る）
+        pub_text = message(ev, "").rstrip()
         cur = st["targets"][ev["id"]]
         if ev["old"] not in (None, "up") and cur.get("issue"):
-            notify.issue_close(cur["issue"], text)
+            notify.issue_close(cur["issue"], pub_text)
             cur["issue"] = None
         if ev["new"] != "up":
-            cur["issue"] = notify.issue_open(text.split("\n")[0], text)
+            cur["issue"] = notify.issue_open(pub_text.split("\n")[0], pub_text)
 
     key = S.week_key(now)
     if st.get("last_heartbeat") != key:
-        summary = weekly_summary(st, targets, now)
+        summary = weekly_summary(st, targets, now, pub)
         print("\n" + summary)
         if not a.dry_run:
             notify.telegram(summary)
