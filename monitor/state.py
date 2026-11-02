@@ -60,6 +60,37 @@ def dump(st):
     return json.dumps(st, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
 
 
+def public_keys(targets):
+    """Secret の id → 公開の記録に使う鍵（ラベル）。ラベルが無い・重複するときは「対象 N」。"""
+    out, seen = {}, set()
+    for i, t in enumerate(targets, 1):
+        k = (t.get("label") or "").strip()
+        if not k or k in seen or k.startswith("cert:"):
+            k = "対象 %d" % i
+        seen.add(k)
+        out[t["id"]] = k
+    return out
+
+
+def migrate_keys(st, pub):
+    """旧版は Secret の id を鍵にしていた。状態と障害の記録を公開の鍵へ移す（通知の誤発火を防ぐ）。"""
+    moved = 0
+    for tid, k in pub.items():
+        if tid == k:
+            continue
+        if tid in st["targets"]:
+            cur = st["targets"].pop(tid)
+            if k not in st["targets"]:
+                cur["name"] = k
+                st["targets"][k] = cur
+            moved += 1
+        for inc in st["incidents"]:
+            if inc.get("id") == tid:
+                inc["id"] = k
+                inc["name"] = k
+    return moved
+
+
 def write_if_changed(path, text):
     old = None
     if os.path.exists(path):

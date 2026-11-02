@@ -83,5 +83,41 @@ class Render(unittest.TestCase):
         self.assertEqual(S.week_key(dt.datetime(2026, 9, 27, 16, 0, tzinfo=S.UTC)), "2026-W40")
 
 
+class PublicKeys(unittest.TestCase):
+    TARGETS = [{"id": "secret-top", "label": "Site A (top)", "url": "https://x/"},
+               {"id": "secret-ask", "label": "AI health 1", "url": "https://y/"},
+               {"id": "secret-dup", "label": "AI health 1", "url": "https://z/"},
+               {"id": "secret-nolabel", "url": "https://w/"}]
+
+    def test_keys_are_labels_and_unique(self):
+        pub = S.public_keys(self.TARGETS)
+        self.assertEqual(pub["secret-top"], "Site A (top)")
+        self.assertEqual(pub["secret-ask"], "AI health 1")
+        self.assertEqual(pub["secret-dup"], "対象 3")
+        self.assertEqual(pub["secret-nolabel"], "対象 4")
+
+    def test_migration_keeps_state_and_stays_silent(self):
+        st = S.empty()
+        S.apply(st, "secret-top", "Site A (top)", "", "down", "r", T(0))
+        S.apply(st, "secret-ask", "AI health 1", "", "up", "ok", T(0))
+        pub = S.public_keys(self.TARGETS)
+        self.assertEqual(S.migrate_keys(st, pub), 2)
+        self.assertEqual(st["targets"]["Site A (top)"]["since"], S.iso(T(0)))
+        # 移した後、同じ状態なら出来事は出ない（誤って障害・復旧を通知しない）
+        self.assertIsNone(S.apply(st, pub["secret-top"], pub["secret-top"], "", "down", "r", T(10)))
+        self.assertIsNone(S.apply(st, pub["secret-ask"], pub["secret-ask"], "", "up", "ok", T(10)))
+        # 障害の記録も移り、停止時間が引き続き数えられる
+        self.assertEqual(S.downtime_minutes(st, "Site A (top)", T(0), T(30)), 30)
+        self.assertNotIn("secret", S.dump(st))
+
+    def test_migration_is_idempotent(self):
+        st = S.empty()
+        S.apply(st, "secret-top", "Site A (top)", "", "up", "ok", T(0))
+        pub = S.public_keys(self.TARGETS)
+        S.migrate_keys(st, pub)
+        self.assertEqual(S.migrate_keys(st, pub), 0)
+        self.assertEqual(list(st["targets"]), ["Site A (top)"])
+
+
 if __name__ == "__main__":
     unittest.main()
